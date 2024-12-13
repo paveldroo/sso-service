@@ -1,0 +1,3 @@
+db:
+  db_path: "internal/db/sqlite/db.sqlite"
+  migrations_path: "internal/db/sqlite/migrations"

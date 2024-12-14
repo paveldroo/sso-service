@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	cfg, err := config.ParseCfg()
+	cfg, err := config.ParseCfg("config.yml")
 	if err != nil {
 		slog.Error("parse config", sl.Err(err))
 		os.Exit(1)
@@ -32,6 +32,7 @@ func main() {
 	slog.Info("starting server...")
 	if err = s.Serve(lis); err != nil {
 		slog.Error("running server: %w", err)
+		os.Exit(1)
 	}
 
 	slog.Info("all is ok!")

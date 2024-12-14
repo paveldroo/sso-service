@@ -8,3 +8,7 @@ tasks:
   run:
     cmds:
       - go run cmd/sso/main.go
+
+  test:
+    cmds:
+      - go test ./...

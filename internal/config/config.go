@@ -22,8 +22,8 @@ type DB struct {
 	MigrationsPath string `yaml:"migrations_path"`
 }
 
-func ParseCfg() (*Config, error) {
-	buf, err := os.ReadFile("config.yml")
+func ParseCfg(path string) (*Config, error) {
+	buf, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("open config file: %w", err)
 	}

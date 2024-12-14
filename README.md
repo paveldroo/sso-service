@@ -1,2 +1,2 @@
 # sso-service
-Build SSO service with Go
+Building SSO service with Go and gRPC

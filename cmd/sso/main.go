@@ -4,8 +4,8 @@ import (
 	"log/slog"
 
 	"github.com/paveldroo/sso-service/internal/config"
-	"github.com/paveldroo/sso-service/internal/db/sqlite"
 	"github.com/paveldroo/sso-service/internal/logger/sl"
+	"github.com/paveldroo/sso-service/internal/storage/sqlite"
 )
 
 func main() {
@@ -19,8 +19,6 @@ func main() {
 		slog.Error("run migrations", sl.Err(err))
 
 	}
-
-	// TODO: logger
 
 	// TODO: storage
 

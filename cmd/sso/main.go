@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
+	"net"
 	"os"
 
 	"github.com/paveldroo/sso-service/internal/config"
+	server "github.com/paveldroo/sso-service/internal/grpc"
 	"github.com/paveldroo/sso-service/internal/logger/sl"
 	"github.com/paveldroo/sso-service/internal/storage/sqlite"
 )
@@ -23,11 +26,13 @@ func main() {
 	}
 	_ = storage
 
-	// TODO: handlers
+	s := server.New()
 
-	// TODO: build grpc app
-
-	// TODO: grpc app
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.Port))
+	slog.Info("starting server...")
+	if err = s.Serve(lis); err != nil {
+		slog.Error("running server: %w", err)
+	}
 
 	slog.Info("all is ok!")
 }

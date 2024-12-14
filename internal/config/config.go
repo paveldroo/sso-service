@@ -8,7 +8,13 @@ import (
 )
 
 type Config struct {
-	DB DB `yaml:"db"`
+	Server Server `yaml:"server"`
+	DB     DB     `yaml:"db"`
+}
+
+type Server struct {
+	Host string `yaml:"host"`
+	Port int    `yaml:"port"`
 }
 
 type DB struct {

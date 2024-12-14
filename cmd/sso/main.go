@@ -2,6 +2,7 @@ package main
 
 import (
 	"log/slog"
+	"os"
 
 	"github.com/paveldroo/sso-service/internal/config"
 	"github.com/paveldroo/sso-service/internal/logger/sl"
@@ -12,19 +13,21 @@ func main() {
 	cfg, err := config.ParseCfg()
 	if err != nil {
 		slog.Error("parse config", sl.Err(err))
+		os.Exit(1)
 	}
 
-	err = sqlite.New(cfg)
+	storage, err := sqlite.New(cfg)
 	if err != nil {
-		slog.Error("run migrations", sl.Err(err))
-
+		slog.Error("create sqlite storage", sl.Err(err))
+		os.Exit(1)
 	}
-
-	// TODO: storage
+	_ = storage
 
 	// TODO: handlers
 
 	// TODO: build grpc app
 
 	// TODO: grpc app
+
+	slog.Info("all is ok!")
 }

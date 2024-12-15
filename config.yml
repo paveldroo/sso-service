@@ -1,6 +1,0 @@
-server:
-  host: "localhost"
-  port: 8084
-db:
-  db_path: "internal/storage/sqlite/db.sqlite"
-  migrations_path: "internal/storage/sqlite/migrations"

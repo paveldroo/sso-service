@@ -11,7 +11,7 @@ tasks:
 
   run:
     cmds:
-      - go run ./cmd/sso
+      - go run ./cmd/sso --config=config/config.yml
 
   test:
     cmds:

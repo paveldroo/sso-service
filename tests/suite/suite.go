@@ -19,9 +19,7 @@ type TestSuite struct {
 func New(t *testing.T) TestSuite {
 	t.Helper()
 
-	cfg, err := config.ParseCfg("../../../config.yml")
-	require.NoError(t, err)
-
+	cfg := config.MustLoadPath("../../../config/config.yml")
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)

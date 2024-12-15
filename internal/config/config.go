@@ -1,9 +1,11 @@
 package config
 
 import (
-	"fmt"
+	"flag"
+	"log/slog"
 	"os"
 
+	"github.com/paveldroo/sso-service/internal/logger/sl"
 	"gopkg.in/yaml.v3"
 )
 
@@ -22,16 +24,34 @@ type DB struct {
 	MigrationsPath string `yaml:"migrations_path"`
 }
 
-func ParseCfg(path string) (*Config, error) {
-	buf, err := os.ReadFile(path)
+func MustLoad() *Config {
+	var cfgPath string
+	flag.StringVar(&cfgPath, "config", "", "path to app config file")
+	flag.Parse()
+
+	if cfgPath == "" {
+		slog.Error("config file path is empty, usage: --config=<path_to_file>")
+	}
+
+	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
+		slog.Error("config file doesn't exists: " + cfgPath)
+		os.Exit(1)
+	}
+
+	return MustLoadPath(cfgPath)
+}
+
+func MustLoadPath(cfgPath string) *Config {
+	buf, err := os.ReadFile(cfgPath)
 	if err != nil {
-		return nil, fmt.Errorf("open config file: %w", err)
+		slog.Error("failed to open config file", sl.Err(err))
+		os.Exit(1)
 	}
 
 	cfg := &Config{}
 	if err = yaml.Unmarshal(buf, cfg); err != nil {
-		return nil, err
+		slog.Error("failed to parse config file", sl.Err(err))
 	}
 
-	return cfg, nil
+	return cfg
 }

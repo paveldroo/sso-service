@@ -13,12 +13,7 @@ import (
 )
 
 func main() {
-	cfg, err := config.ParseCfg("config.yml")
-	if err != nil {
-		slog.Error("parse config", sl.Err(err))
-		os.Exit(1)
-	}
-
+	cfg := config.MustLoad()
 	storage, err := sqlite.New(cfg)
 	if err != nil {
 		slog.Error("create sqlite storage", sl.Err(err))

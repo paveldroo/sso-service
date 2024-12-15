@@ -2,12 +2,10 @@ package sqlite
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 
-	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+
 	"github.com/paveldroo/sso-service/internal/config"
 	"github.com/paveldroo/sso-service/internal/user"
 )
@@ -17,10 +15,6 @@ type Sqlite struct {
 }
 
 func New(cfg *config.Config) (*Sqlite, error) {
-	if err := migrateDB(cfg); err != nil {
-		return nil, fmt.Errorf("migrate db: %w", err)
-	}
-
 	db, err := sql.Open("sqlite3", cfg.DB.Path)
 	if err != nil {
 		return nil, fmt.Errorf("open database connection: %w", err)
@@ -70,21 +64,4 @@ func (s *Sqlite) IsAdmin(email string) (bool, error) {
 	}
 
 	return u.IsAdmin, nil
-}
-
-func migrateDB(cfg *config.Config) error {
-	m, err := migrate.New(
-		"file://"+cfg.DB.MigrationsPath,
-		"sqlite3://"+cfg.DB.Path,
-	)
-
-	if err != nil {
-		return fmt.Errorf("init migrations: %w", err)
-	}
-
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		return fmt.Errorf("run migrations: %w", err)
-	}
-
-	return nil
 }

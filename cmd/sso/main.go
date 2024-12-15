@@ -26,12 +26,12 @@ func main() {
 	}
 	_ = storage
 
-	s := server.New()
+	s := server.New(storage)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.Port))
 	slog.Info("starting server...")
 	if err = s.Serve(lis); err != nil {
-		slog.Error("running server: %w", err)
+		slog.Error("running server", sl.Err(err))
 		os.Exit(1)
 	}
 

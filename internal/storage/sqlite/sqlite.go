@@ -23,7 +23,7 @@ func New(cfg *config.Config) (*Sqlite, error) {
 
 	db, err := sql.Open("sqlite3", cfg.DB.Path)
 	if err != nil {
-		return nil, fmt.Errorf("open database connection", err)
+		return nil, fmt.Errorf("open database connection: %w", err)
 	}
 
 	return &Sqlite{db: db}, nil

@@ -6,11 +6,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/paveldroo/sso-service/internal/logger/sl"
+	"github.com/paveldroo/sso-service/internal/lib/logger/sl"
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
+	Env         string     `yaml:"env"`
 	GRPC        GRPCConfig `yaml:"grpc"`
 	StoragePath string     `yaml:"storage_path"`
 }

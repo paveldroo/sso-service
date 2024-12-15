@@ -1,3 +1,4 @@
+env: local
 storage_path: "internal/storage/sqlite/db.sqlite"
 grpc:
   port: 8084

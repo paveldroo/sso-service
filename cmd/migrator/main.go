@@ -9,7 +9,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/paveldroo/sso-service/internal/logger/sl"
+	"github.com/paveldroo/sso-service/internal/lib/logger/sl"
 )
 
 func main() {
@@ -23,8 +23,8 @@ func main() {
 	}
 
 	m, err := migrate.New(
-		"file://" + *migrationsPath,
-		"sqlite3://" + *storagePath,
+		"file://"+*migrationsPath,
+		"sqlite3://"+*storagePath,
 	)
 	if err != nil {
 		slog.Error("failed to init migrations", sl.Err(err))

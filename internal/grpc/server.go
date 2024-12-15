@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/paveldroo/sso-service/internal/logger/sl"
+	"github.com/paveldroo/sso-service/internal/lib/logger/sl"
 	pb "github.com/paveldroo/sso-service/protos/sso"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

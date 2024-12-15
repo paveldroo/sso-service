@@ -1,6 +1,4 @@
+storage_path: "internal/storage/sqlite/db.sqlite"
 grpc:
   port: 8084
   timeout: 1s
-db:
-  db_path: "internal/storage/sqlite/db.sqlite"
-  migrations_path: "internal/storage/sqlite/migrations"

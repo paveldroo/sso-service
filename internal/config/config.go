@@ -11,18 +11,13 @@ import (
 )
 
 type Config struct {
-	GRPC GRPCConfig `yaml:"grpc"`
-	DB   DB         `yaml:"db"`
+	GRPC        GRPCConfig `yaml:"grpc"`
+	StoragePath string     `yaml:"storage_path"`
 }
 
 type GRPCConfig struct {
 	Port    int           `yaml:"port"`
 	Timeout time.Duration `yaml:"timeout"`
-}
-
-type DB struct {
-	Path           string `yaml:"db_path"`
-	MigrationsPath string `yaml:"migrations_path"`
 }
 
 func MustLoad() *Config {

@@ -15,7 +15,7 @@ type Sqlite struct {
 }
 
 func New(cfg *config.Config) (*Sqlite, error) {
-	db, err := sql.Open("sqlite3", cfg.DB.Path)
+	db, err := sql.Open("sqlite3", cfg.StoragePath)
 	if err != nil {
 		return nil, fmt.Errorf("open database connection: %w", err)
 	}

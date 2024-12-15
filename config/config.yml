@@ -1,5 +1,5 @@
 env: local
-storage_path: "internal/storage/sqlite/db.sqlite"
+storage_path: "db.sqlite"
 grpc:
   port: 8084
   timeout: 1s

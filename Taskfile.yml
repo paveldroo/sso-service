@@ -7,7 +7,7 @@ tasks:
 
   migrate:
     cmds:
-      - go run ./cmd/migrator --storage-path=internal/storage/sqlite/db.sqlite --migrations-path=internal/storage/sqlite/migrations
+      - go run ./cmd/migrator --storage-path=db.sqlite --migrations-path=migrations
 
   run:
     cmds:

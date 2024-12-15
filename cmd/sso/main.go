@@ -23,7 +23,7 @@ func main() {
 
 	s := server.New(storage)
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.Port))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.GRPC.Port))
 	slog.Info("starting server...")
 	if err = s.Serve(lis); err != nil {
 		slog.Error("running server", sl.Err(err))

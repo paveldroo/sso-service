@@ -3,7 +3,9 @@ package server
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
+	"github.com/paveldroo/sso-service/internal/logger/sl"
 	pb "github.com/paveldroo/sso-service/protos/sso"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -29,6 +31,7 @@ func New(storage Storage) *grpc.Server {
 
 func (a AuthServer) Register(ctx context.Context, r *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	if err := a.storage.AddUser(r.Email, r.Password, false); err != nil {
+		slog.Error("add user to storage: %w", sl.Err(err))
 		return nil, status.Error(codes.Internal, "user register failed")
 	}
 	return &pb.RegisterResponse{Message: "OK"}, nil

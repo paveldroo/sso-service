@@ -20,7 +20,7 @@ func New(t *testing.T) TestSuite {
 	t.Helper()
 
 	cfg := config.MustLoadPath("../../../config/config.yml")
-	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
+	addr := fmt.Sprintf("localhost:%d", cfg.GRPC.Port)
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 

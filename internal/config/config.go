@@ -4,19 +4,20 @@ import (
 	"flag"
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/paveldroo/sso-service/internal/logger/sl"
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	Server Server `yaml:"server"`
-	DB     DB     `yaml:"db"`
+	GRPC GRPCConfig `yaml:"grpc"`
+	DB   DB         `yaml:"db"`
 }
 
-type Server struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
+type GRPCConfig struct {
+	Port    int           `yaml:"port"`
+	Timeout time.Duration `yaml:"timeout"`
 }
 
 type DB struct {

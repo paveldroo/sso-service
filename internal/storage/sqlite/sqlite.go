@@ -30,13 +30,13 @@ func (s *Storage) Stop() error {
 	return s.db.Close()
 }
 
-func (s *Storage) AddUser(ctx context.Context, email string, pass_hash []byte) (int64, error) {
+func (s *Storage) AddUser(ctx context.Context, email string, passHash []byte) (int64, error) {
 	stmt, err := s.db.Prepare("INSERT INTO users (email, pass_hash) VALUES (?, ?)")
 	if err != nil {
 		return 0, fmt.Errorf("prepare add user sql statement: %w", err)
 	}
 
-	res, err := stmt.ExecContext(ctx, email, pass_hash)
+	res, err := stmt.ExecContext(ctx, email, passHash)
 	if err != nil {
 		var sqliteErr sqlite3.Error
 		if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
@@ -53,13 +53,13 @@ func (s *Storage) AddUser(ctx context.Context, email string, pass_hash []byte) (
 	return userID, nil
 }
 
-func (s *Storage) User(ctx context.Context, email string, pass_hash []byte) (models.User, error) {
-	stmt, err := s.db.Prepare("SELECT id FROM users WHERE email=? AND password=?")
+func (s *Storage) User(ctx context.Context, email string) (models.User, error) {
+	stmt, err := s.db.Prepare("SELECT id FROM users WHERE email=?")
 	if err != nil {
 		return models.User{}, fmt.Errorf("prepare get user sql statement: %w", err)
 	}
 
-	row := stmt.QueryRowContext(ctx, email, pass_hash)
+	row := stmt.QueryRowContext(ctx, email)
 
 	var user models.User
 	if err := row.Scan(&user.ID, &user.Email, &user.PassHash); err != nil {
@@ -92,7 +92,7 @@ func (s *Storage) IsAdmin(ctx context.Context, userID int64) (bool, error) {
 	return isAdmin, nil
 }
 
-func (s *Storage) App(ctx context.Context, appID int64) (models.App, error) {
+func (s *Storage) App(ctx context.Context, appID int) (models.App, error) {
 	stmt, err := s.db.Prepare("SELECT id FROM apps WHERE id=?")
 	if err != nil {
 		return models.App{}, fmt.Errorf("prepare get app sql statement: %w", err)

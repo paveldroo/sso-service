@@ -11,9 +11,10 @@ import (
 )
 
 type Config struct {
-	Env         string     `yaml:"env"`
-	GRPC        GRPCConfig `yaml:"grpc"`
-	StoragePath string     `yaml:"storage_path"`
+	Env         string        `yaml:"env"`
+	StoragePath string        `yaml:"storage_path"`
+	TokenTLL    time.Duration `yaml:"tokenTTL"`
+	GRPC        GRPCConfig    `yaml:"grpc"`
 }
 
 type GRPCConfig struct {

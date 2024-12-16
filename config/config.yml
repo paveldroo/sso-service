@@ -1,5 +1,6 @@
 env: local
 storage_path: "db.sqlite"
+tokenTTL: 1h
 grpc:
   port: 8084
   timeout: 1s

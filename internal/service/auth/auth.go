@@ -14,7 +14,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var errInvalidCredentials = errors.New("invalid user credentials")
+var ErrInvalidCredentials = errors.New("invalid user credentials")
 
 type UserSaver interface {
 	AddUser(ctx context.Context, email string, pass_hash []byte) (int64, error)
@@ -45,21 +45,6 @@ func New(userSaver UserSaver, userProvider UserProvider, appProvider AppProvider
 	}
 }
 
-func (a Auth) RegisterNewUser(ctx context.Context, email, password string) (int64, error) {
-	slog.Info("registering user")
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return 0, fmt.Errorf("generate hash from password: %w", err)
-	}
-
-	userID, err := a.UserSaver.AddUser(ctx, email, hashedPass)
-	if err != nil {
-		return 0, fmt.Errorf("add user to storage: %w", err)
-	}
-
-	return userID, nil
-}
-
 func (a Auth) Login(ctx context.Context, email, password string, appID int) (string, error) {
 	slog.Info("attempting login user")
 
@@ -67,7 +52,7 @@ func (a Auth) Login(ctx context.Context, email, password string, appID int) (str
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {
 			slog.Warn("user not found", sl.Err(err))
-			return "", fmt.Errorf("get user from storage: %w", errInvalidCredentials)
+			return "", fmt.Errorf("get user from storage: %w", ErrInvalidCredentials)
 		}
 		slog.Warn("failed to get user")
 		return "", fmt.Errorf("get user from storage: %w", err)
@@ -75,7 +60,7 @@ func (a Auth) Login(ctx context.Context, email, password string, appID int) (str
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PassHash), []byte(password)); err != nil {
 		slog.Warn("invalid credentials", sl.Err(err))
-		return "", fmt.Errorf("compare user password and hash: %w", errInvalidCredentials)
+		return "", fmt.Errorf("compare user password and hash: %w", ErrInvalidCredentials)
 	}
 
 	app, err := a.AppProvider.App(ctx, appID)
@@ -92,6 +77,21 @@ func (a Auth) Login(ctx context.Context, email, password string, appID int) (str
 	}
 
 	return token, nil
+}
+
+func (a Auth) RegisterNewUser(ctx context.Context, email, password string) (int64, error) {
+	slog.Info("registering user")
+	hashedPass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return 0, fmt.Errorf("generate hash from password: %w", err)
+	}
+
+	userID, err := a.UserSaver.AddUser(ctx, email, hashedPass)
+	if err != nil {
+		return 0, fmt.Errorf("add user to storage: %w", err)
+	}
+
+	return userID, nil
 }
 
 func (a Auth) IsAdmin(ctx context.Context, userID int64) (bool, error) {

@@ -1,54 +1,81 @@
-package server
+package authgrpc
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
+	"errors"
 
-	"github.com/paveldroo/sso-service/internal/lib/logger/sl"
-	pb "github.com/paveldroo/sso-service/protos/sso"
+	"github.com/paveldroo/sso-service/internal/service/auth"
+	"github.com/paveldroo/sso-service/internal/storage"
+	ssov1 "github.com/paveldroo/sso-service/protos/gen/go/sso"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-type Storage interface {
-	AddUser(email, password string, isAdmin bool) error
-	User(email, password string) (int64, error)
-	IsAdmin(email string) (bool, error)
+type Auth interface {
+	Login(ctx context.Context, email, password string, appID int) (string, error)
+	RegisterNewUser(ctx context.Context, email, password string) (int64, error)
+	IsAdmin(ctx context.Context, userID int64) (bool, error)
 }
 
-type AuthServer struct {
-	storage Storage
-	pb.UnimplementedAuthServer
+type Server struct {
+	ssov1.UnimplementedAuthServer
+	auth Auth
 }
 
-func New(storage Storage) *grpc.Server {
-	s := grpc.NewServer()
-	pb.RegisterAuthServer(s, &AuthServer{storage: storage})
-	return s
+func Register(g *grpc.Server, authService Auth) {
+	ssov1.RegisterAuthServer(g, &Server{auth: authService})
 }
 
-func (a AuthServer) Register(ctx context.Context, r *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	if err := a.storage.AddUser(r.Email, r.Password, false); err != nil {
-		slog.Error("add user to storage: %w", sl.Err(err))
-		return nil, status.Error(codes.Internal, "user register failed")
+func (s Server) Login(ctx context.Context, in *ssov1.LoginRequest) (*ssov1.LoginResponse, error) {
+	if in.Email == "" {
+		return nil, status.Error(codes.InvalidArgument, "email is required")
 	}
-	return &pb.RegisterResponse{Message: "OK"}, nil
-}
-
-func (a AuthServer) Login(ctx context.Context, r *pb.LoginRequest) (*pb.LoginResponse, error) {
-	id, err := a.storage.User(r.Email, r.Password)
+	if in.Password == "" {
+		return nil, status.Error(codes.InvalidArgument, "password is required")
+	}
+	if in.AppID == 0 {
+		return nil, status.Error(codes.InvalidArgument, "app_id is required")
+	}
+	token, err := s.auth.Login(ctx, in.GetEmail(), in.GetPassword(), int(in.GetAppID()))
 	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, "incorrect email or password")
+		if errors.Is(err, auth.ErrInvalidCredentials) {
+			return nil, status.Error(codes.PermissionDenied, "incorrect email or password")
+		}
+		return nil, status.Error(codes.Internal, "failed to login")
 	}
-	return &pb.LoginResponse{Token: fmt.Sprintf("userID: %d", id)}, nil
+	return &ssov1.LoginResponse{Token: token}, nil
 }
 
-func (a AuthServer) IsAdmin(ctx context.Context, r *pb.IsAdminRequest) (*pb.IsAdminResponse, error) {
-	isAdmin, err := a.storage.IsAdmin(r.Email)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "user not found")
+func (s Server) Register(ctx context.Context, in *ssov1.RegisterRequest) (*ssov1.RegisterResponse, error) {
+	if in.Email == "" {
+		return nil, status.Error(codes.InvalidArgument, "email is required")
 	}
-	return &pb.IsAdminResponse{IsAdmin: isAdmin}, nil
+	if in.Password == "" {
+		return nil, status.Error(codes.InvalidArgument, "password is required")
+	}
+
+	userID, err := s.auth.RegisterNewUser(ctx, in.Email, in.Password)
+	if err != nil {
+		if errors.Is(err, storage.ErrUserExists) {
+			return nil, status.Error(codes.AlreadyExists, "user already exists")
+		}
+		return nil, status.Error(codes.Internal, "failed register user")
+	}
+
+	return &ssov1.RegisterResponse{UserID: userID}, nil
+}
+
+func (s Server) IsAdmin(ctx context.Context, in *ssov1.IsAdminRequest) (*ssov1.IsAdminResponse, error) {
+	if in.UserID == 0 {
+		return nil, status.Error(codes.InvalidArgument, "user_id is required")
+	}
+	isAdmin, err := s.auth.IsAdmin(ctx, in.UserID)
+	if err != nil {
+		if errors.Is(err, storage.ErrUserNotFound) {
+			return nil, status.Error(codes.NotFound, "user not found")
+		}
+		return nil, status.Error(codes.Internal, "failed to check user is admin")
+	}
+	return &ssov1.IsAdminResponse{IsAdmin: isAdmin}, nil
 }

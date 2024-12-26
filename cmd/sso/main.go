@@ -1,16 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
-	"net"
 	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/paveldroo/sso-service/internal/app"
 	"github.com/paveldroo/sso-service/internal/config"
-	server "github.com/paveldroo/sso-service/internal/grpc"
 	slogpretty "github.com/paveldroo/sso-service/internal/lib/logger/handlers"
-	"github.com/paveldroo/sso-service/internal/lib/logger/sl"
-	"github.com/paveldroo/sso-service/internal/storage/sqlite"
 )
 
 const envLocal = "local"
@@ -20,23 +18,20 @@ func main() {
 
 	setupLogger(cfg.Env)
 
-	storage, err := sqlite.New(cfg)
-	if err != nil {
-		slog.Error("create sqlite storage", sl.Err(err))
-		os.Exit(1)
-	}
-	_ = storage
+	app := app.New(slog.Default(), cfg.GRPC.Port, cfg.StoragePath, cfg.TokenTLL)
 
-	s := server.New(storage)
+	go func() {
+		app.GRPCServer.MustRun()
+	}()
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.GRPC.Port))
-	slog.Info("starting server...")
-	if err = s.Serve(lis); err != nil {
-		slog.Error("running server", sl.Err(err))
-		os.Exit(1)
-	}
+	// Graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
-	slog.Info("all is ok!")
+	<-stop
+
+	app.GRPCServer.Stop()
+	slog.Info("server stopped")
 }
 
 func setupLogger(env string) {

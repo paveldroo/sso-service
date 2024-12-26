@@ -30,14 +30,16 @@ type AppProvider interface {
 }
 
 type Auth struct {
+	log          *slog.Logger
 	UserSaver    UserSaver
 	UserProvider UserProvider
 	AppProvider  AppProvider
 	tokenTTL     time.Duration
 }
 
-func New(userSaver UserSaver, userProvider UserProvider, appProvider AppProvider, tokenTTL time.Duration) Auth {
+func New(log *slog.Logger, userSaver UserSaver, userProvider UserProvider, appProvider AppProvider, tokenTTL time.Duration) Auth {
 	return Auth{
+		log:          log,
 		UserSaver:    userSaver,
 		UserProvider: userProvider,
 		AppProvider:  appProvider,

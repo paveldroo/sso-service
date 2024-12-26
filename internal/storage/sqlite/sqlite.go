@@ -8,7 +8,6 @@ import (
 
 	"github.com/mattn/go-sqlite3"
 
-	"github.com/paveldroo/sso-service/internal/config"
 	"github.com/paveldroo/sso-service/internal/domain/models"
 	"github.com/paveldroo/sso-service/internal/storage"
 )
@@ -17,8 +16,8 @@ type Storage struct {
 	db *sql.DB
 }
 
-func New(cfg *config.Config) (*Storage, error) {
-	db, err := sql.Open("sqlite3", cfg.StoragePath)
+func New(storagePath string) (*Storage, error) {
+	db, err := sql.Open("sqlite3", storagePath)
 	if err != nil {
 		return nil, fmt.Errorf("open database connection: %w", err)
 	}

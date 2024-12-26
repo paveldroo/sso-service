@@ -6,14 +6,14 @@ import (
 
 	"github.com/brianvoe/gofakeit"
 	"github.com/paveldroo/sso-service/internal/config"
-	pb "github.com/paveldroo/sso-service/protos/sso"
+	ssov1 "github.com/paveldroo/sso-service/protos/gen/go/sso"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type TestSuite struct {
-	Client pb.AuthClient
+	Client ssov1.AuthClient
 }
 
 func New(t *testing.T) TestSuite {
@@ -24,7 +24,7 @@ func New(t *testing.T) TestSuite {
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 
-	client := pb.NewAuthClient(conn)
+	client := ssov1.NewAuthClient(conn)
 
 	ts := TestSuite{Client: client}
 
